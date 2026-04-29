@@ -2,6 +2,8 @@ import { useState } from 'react';
 import type { MensagemContato } from './types'; // Trazendo o nosso contrato
 import './App.css';
 
+
+
 function App() {
   // 1. O ESTADO BLINDADO
   // O TypeScript obriga que "formulario" tenha nome, email e mensagem.
