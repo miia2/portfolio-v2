@@ -1,45 +1,46 @@
 import { useEffect, useState } from 'react';
-import api from '../services/api'; // Importa a central que criamos no Passo 2
+import api from '../services/api';
 
-// Definimos o que esperamos receber do Python para o TypeScript não reclamar
+// Definimos o tipo de dado que esperamos (Engenharia de Software com TS)
 interface UserData {
   full_name: string;
   email: string;
 }
 
-export function Dashboard() {
-  const [usuario, setUsuario] = useState<UserData | null>(null);
-  const [carregando, setCarregando] = useState(true);
+const Dashboard = () => {
+  const [user, setUser] = useState<UserData | null>(null);
 
   useEffect(() => {
-    // Esta é a função do Passo 4!
-    async function buscarMeuPerfil() {
+    // Busca os dados do usuário logado usando o Token salvo no localStorage
+    const fetchUser = async () => {
       try {
-        const resposta = await api.get('/users/me');
-        setUsuario(resposta.data); // Guarda os dados do Python no estado do React
+        const response = await api.get('/users/me');
+        setUser(response.data);
       } catch (error) {
-        console.error("Erro: Você provavelmente não está logada.");
-      } finally {
-        setCarregando(false);
+        console.error("Erro ao carregar perfil", error);
+        // Se der erro (token expirado), podemos deslogar o usuário
       }
-    }
+    };
 
-    buscarMeuPerfil();
-  }, []); // Os colchetes vazios garantem que isso só rode UMA vez
+    fetchUser();
+  }, []);
 
-  if (carregando) return <p>Carregando dados do Ludus...</p>;
+  if (!user) return <p>Carregando seu portal...</p>;
 
   return (
-    <div>
-      <h1>Bem-vinda ao seu Painel, {usuario?.full_name}!</h1>
-      <p>Seu e-mail cadastrado é: {usuario?.email}</p>
+    <div style={{ padding: '20px' }}>
+      <h1>Bem-vinda ao Ludus, {user.full_name}!</h1>
+      <p>Seu e-mail de acesso: {user.email}</p>
       
+      {/* Aqui entrarão as funcionalidades do seu SaaS */}
       <button onClick={() => {
-        localStorage.clear(); // Limpa o token
-        window.location.href = '/login'; // Manda pro login
+        localStorage.clear();
+        window.location.href = '/login';
       }}>
         Sair do Sistema
       </button>
     </div>
   );
-}
+};
+
+export default Dashboard;
