@@ -1,10 +1,11 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000', // O endereço do seu Python
+  // O Vite usa import.meta.env para ler variáveis de ambiente.
+  // Se existir um link de produção, ele usa. Se não, cai no localhost.
+  baseURL: import.meta.env.VITE_API_URL || 'https://api-catalogo-digital.onrender.com/',
 });
 
-// Essa função anexa o Token automaticamente em todas as chamadas futuras
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('@Ludus:token');
   if (token) {

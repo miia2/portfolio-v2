@@ -1,15 +1,19 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/login';
+import Register from './pages/Register'; // <-- Importe o novo componente aqui
 import Dashboard from './pages/dashboard';
 import Store from './pages/Store';
-import ProtectedRoute from './components/ProtectedRoute'; // O que você já tinha criado
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
+        
+        {/* Rotas Públicas */}
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} /> {/* <-- Adicione a rota aqui */}
         
         {/* Painel do Dono da Loja */}
         <Route path="/dashboard" element={
@@ -18,7 +22,7 @@ function App() {
           </ProtectedRoute>
         } />
 
-        {/* Vitrine Pública (Ex: site.com/loja/loja-da-mia) */}
+        {/* Vitrine Pública */}
         <Route path="/loja/:slug" element={<Store />} />
       </Routes>
     </Router>
@@ -26,3 +30,4 @@ function App() {
 }
 
 export default App;
+     

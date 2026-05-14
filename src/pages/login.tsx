@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import api from '../services/api';
+import { Link } from 'react-router-dom';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -65,6 +66,12 @@ const Login: React.FC = () => {
         <button type="submit" style={{ width: '100%', padding: '10px', cursor: 'pointer' }}>
           Entrar no Sistema
         </button>
+
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+  <p style={{ color: '#6b7280' }}>
+    Ainda não tem uma loja? <Link to="/register" style={{ color: '#3b82f6', textDecoration: 'none', fontWeight: 'bold' }}>Crie sua conta de graça</Link>
+  </p>
+</div>
 
         <hr style={{ margin: '20px 0' }} /> 
         
