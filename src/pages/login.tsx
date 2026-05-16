@@ -1,10 +1,39 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { Link } from 'react-router-dom';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+const navigate = useNavigate(); // <-- ADICIONE ISTO AQUI (antes das outras funções)
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const params = new URLSearchParams();
+      params.append('username', email);
+      params.append('password', password);
+
+      const response = await api.post('/login', params);
+      
+      // Pegamos o token e o slug da loja que o backend novo envia
+      const { access_token, store_slug } = response.data; 
+ 
+      localStorage.setItem('@Ludus:token', access_token);
+      localStorage.setItem('@Ludus:storeSlug', store_slug);
+
+      alert("Login realizado com sucesso!");
+      
+      // O PULO DO GATO: Isso vai mandar o lojista direto para o painel dele!
+      navigate('/dashboard'); 
+      
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao entrar. Verifique seu e-mail e senha.");
+    }
+  };
 
   // --- 1. FUNÇÃO DE TESTE (Adicione esta parte aqui!) ---
   const testarConexao = async () => {
@@ -15,27 +44,6 @@ const Login: React.FC = () => {
     } catch (error) {
       console.error("Erro ao conectar:", error);
       alert("O servidor Python está desligado ou o CORS bloqueou o acesso.");
-    }
-  };
-
-  // 2. Função de Login
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const params = new URLSearchParams();
-      params.append('username', email);
-      params.append('password', password);
-
-      const response = await api.post('/login', params);
-      const { access_token, user_name } = response.data;
-      
-      localStorage.setItem('@Ludus:token', access_token);
-      localStorage.setItem('@Ludus:userName', user_name);
-
-      alert(`Sucesso! Bem-vinda, ${user_name}`);
-    } catch (error) {
-      console.error(error);
-      alert("Erro ao entrar. Verifique seu e-mail e senha.");
     }
   };
 
