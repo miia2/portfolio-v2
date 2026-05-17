@@ -7,6 +7,7 @@ interface Product {
   name: string;
   description: string;
   price: number;
+  image_url?: string;
   is_available: boolean;
 }
 
@@ -24,6 +25,7 @@ const Dashboard = () => {
   const [nome, setNome] = useState('');
   const [descricao, setDescricao] = useState('');
   const [preco, setPreco] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [produtoEditando, setProdutoEditando] = useState<Product | null>(null);
 
   // 3. Carregar dados ao entrar na página
@@ -53,6 +55,7 @@ const Dashboard = () => {
       name: nome,
       description: descricao,
       price: parseFloat(preco),
+      image_url: imageUrl,
       is_available: true
     };
 
@@ -95,6 +98,7 @@ const Dashboard = () => {
     setNome(produto.name);
     setDescricao(produto.description);
     setPreco(produto.price.toString());
+    setImageUrl(produto.image_url || '');
   };
 
   const limparFormulario = () => {
@@ -102,6 +106,7 @@ const Dashboard = () => {
     setNome('');
     setDescricao('');
     setPreco('');
+    setImageUrl('');
   };
 
   // Se ainda estiver carregando, mostra uma mensagem
@@ -155,6 +160,12 @@ const Dashboard = () => {
             type="text" placeholder="Descrição rápida" required
             value={descricao} onChange={(e) => setDescricao(e.target.value)}
             style={{ flex: '2 1 300px', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+          />
+
+          <input 
+           type="url" placeholder="Link da Imagem do Produto (URL)" 
+           value={imageUrl} onChange={(e) => setImageUrl(e.target.value)}
+           style={{ flex: '1 1 100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }} 
           />
           
           <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
