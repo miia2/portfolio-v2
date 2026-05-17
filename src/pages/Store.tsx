@@ -7,6 +7,7 @@ interface Product {
   name: string;
   price: number;
   description: string;
+  image_url?: string;
 }
 
 interface StoreData {
@@ -57,6 +58,17 @@ const Store = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
         {store.products.map(product => (
           <div key={product.id} style={{ border: '1px solid #e5e7eb', borderRadius: '12px', padding: '20px', backgroundColor: '#fff', color: '#333' }}>
+            <div style={{ width: '100%', height: '180px', backgroundColor: '#f3f4f6', borderRadius: '8px', marginBottom: '15px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {product.image_url ? (
+        <img 
+          src={product.image_url} 
+          alt={product.name} 
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+      ) : (
+        <span style={{ color: '#9ca3af', fontSize: '0.9rem' }}>Sem foto</span>
+      )}
+    </div>
             <h3 style={{ marginTop: 0 }}>{product.name}</h3>
             <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>{product.description}</p>
             <h2 style={{ color: '#10b981' }}>R$ {product.price.toFixed(2)}</h2>
