@@ -109,6 +109,18 @@ const Dashboard = () => {
     setImageUrl('');
   };
 
+  const copiarLinkLoja = () => {
+  if (!user) return;
+  
+  // Monta o link real da vitrine com base no slug do lojista
+  const linkCompleto = `${window.location.origin}/loja/${user.store_slug}`;
+  
+  // Copia para a área de transferência do celular ou computador
+  navigator.clipboard.writeText(linkCompleto);
+  
+  alert("🔗 Link da sua vitrine copiado com sucesso!");
+};
+
   // Se ainda estiver carregando, mostra uma mensagem
   if (!user) return <p style={{ textAlign: 'center', marginTop: '50px' }}>Carregando seu painel...</p>;
 
@@ -121,15 +133,25 @@ const Dashboard = () => {
           <h1 style={{ margin: 0, color: '#1e3a8a' }}>Painel da Loja</h1>
           <p style={{ margin: 0, color: '#6b7280' }}>Bem-vindo(a), {user.full_name}</p>
         </div>
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          
+          {/* NOVO BOTÃO: COPIAR LINK */}
+          <button 
+            onClick={copiarLinkLoja}
+            style={{ backgroundColor: '#10b981', color: '#fff', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+          >
+            🔗 Copiar Link da Loja
+          </button>
+
           <a 
             href={`/loja/${user.store_slug}`} 
             target="_blank" 
             rel="noreferrer"
-            style={{ backgroundColor: '#3b82f6', color: '#fff', padding: '10px 15px', textDecoration: 'none', borderRadius: '8px', marginRight: '10px' }}
+            style={{ backgroundColor: '#3b82f6', color: '#fff', padding: '10px 15px', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold' }}
           >
             👀 Ver minha Vitrine
           </a>
+
           <button 
             onClick={() => { localStorage.clear(); window.location.href = '/login'; }}
             style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer' }}
