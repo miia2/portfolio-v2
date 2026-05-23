@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/login';
+import Login from './pages/Login';
 import Register from './pages/Register'; // <-- Importe o novo componente aqui
-import Dashboard from './pages/dashboard';
+import Dashboard from './pages/Dashboard';
 import Store from './pages/Store';
 import ProtectedRoute from './components/ProtectedRoute';
 
