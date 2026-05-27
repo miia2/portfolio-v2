@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next'; // 1. Importamos o tradutor
 import api from '../services/api';
 
 interface Product {
@@ -18,6 +19,8 @@ interface StoreData {
 
 const Store = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { t } = useTranslation(); // 2. Iniciamos a função "t" (translate)
+  
   const [store, setStore] = useState<StoreData | null>(null);
   const [erro, setErro] = useState(false);
 
@@ -37,22 +40,25 @@ const Store = () => {
   const handleOrderWhatsApp = (product: Product) => {
     if (!store) return;
     
-    // Monta a mensagem pré-pronta
-    const mensagem = `Olá! Gostaria de encomendar o produto: *${product.name}* (R$ ${product.price.toFixed(2)}).`;
+    // 3. Mensagem dinâmica! Passamos as variáveis {{name}} e {{price}} para o tradutor
+    const mensagem = t('whatsapp_message', { 
+      name: product.name, 
+      price: product.price.toFixed(2) 
+    });
     
-    // Redireciona para o WhatsApp do vendedor
     const url = `https://wa.me/${store.whatsapp_number}?text=${encodeURIComponent(mensagem)}`;
     window.open(url, '_blank');
   };
 
-  if (erro) return <h2 style={{ textAlign: 'center', marginTop: '50px' }}>Loja não encontrada.</h2>;
-  if (!store) return <p style={{ textAlign: 'center' }}>Carregando catálogo...</p>;
+  // 4. Trocando todos os textos fixos por t('nome_da_chave')
+  if (erro) return <h2 style={{ textAlign: 'center', marginTop: '50px' }}>{t('store_not_found')}</h2>;
+  if (!store) return <p style={{ textAlign: 'center' }}>{t('loading_catalog')}</p>;
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
       <header style={{ textAlign: 'center', marginBottom: '40px' }}>
         <h1 style={{ color: '#2563eb' }}>{store.full_name}</h1>
-        <p>Faça seu pedido diretamente pelo nosso WhatsApp!</p>
+        <p>{t('order_prompt')}</p>
       </header>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
@@ -66,7 +72,7 @@ const Store = () => {
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
         />
       ) : (
-        <span style={{ color: '#9ca3af', fontSize: '0.9rem' }}>Sem foto</span>
+        <span style={{ color: '#9ca3af', fontSize: '0.9rem' }}>{t('no_photo')}</span>
       )}
     </div>
             <h3 style={{ marginTop: 0 }}>{product.name}</h3>
@@ -80,11 +86,11 @@ const Store = () => {
                 border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer'
               }}
             >
-              Pedir no WhatsApp
+              {t('order_button')}
             </button>
           </div>
         ))}
-        {store.products.length === 0 && <p>Nenhum produto cadastrado ainda.</p>}
+        {store.products.length === 0 && <p>{t('no_products')}</p>}
       </div>
     </div>
   );

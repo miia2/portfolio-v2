@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
+import { useTranslation } from 'react-i18next'; // <-- 1. IMPORTAÇÃO DO TRADUTOR
 
 // 1. Definindo os Contratos (Tipagens)
 interface Product {
@@ -17,6 +18,8 @@ interface UserData {
 }
 
 const Dashboard = () => {
+  const { t } = useTranslation(); // <-- 2. ATIVAÇÃO DO TRADUTOR
+
   // 2. Estados da Tela
   const [user, setUser] = useState<UserData | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
@@ -28,26 +31,22 @@ const Dashboard = () => {
   const [imageUrl, setImageUrl] = useState('');
   const [produtoEditando, setProdutoEditando] = useState<Product | null>(null);
 
-  // 3. Carregar dados ao entrar na página
   useEffect(() => {
     carregarPerfilEProdutos();
   }, []);
 
   const carregarPerfilEProdutos = async () => {
     try {
-      // Pega os dados do lojista logado
       const resUser = await api.get('/users/me');
       setUser(resUser.data);
 
-      // DICA: Precisaremos criar esta rota no Python no próximo passo!
       const resProducts = await api.get('/products/me');
       setProducts(resProducts.data);
     } catch (error) {
-      console.error("Erro ao carregar dados", error);
+      console.error(t('dashboard.error_loading'), error); // <-- TEXTO TRADUZIDO
     }
   };
 
-  // 4. Função para Salvar (Criar ou Editar)
   const salvarProduto = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -61,38 +60,33 @@ const Dashboard = () => {
 
     try {
       if (produtoEditando) {
-        // Modo Edição (PUT)
         await api.put(`/products/${produtoEditando.id}`, dadosProduto);
-        alert('Produto atualizado com sucesso!');
+        alert(t('dashboard.product_updated')); // <-- TEXTO TRADUZIDO
       } else {
-        // Modo Criação (POST)
         await api.post('/products', dadosProduto);
-        alert('Produto criado com sucesso!');
+        alert(t('dashboard.product_created')); // <-- TEXTO TRADUZIDO
       }
 
-      // Limpa o formulário e recarrega a lista
       limparFormulario();
       carregarPerfilEProdutos();
     } catch (error) {
-      alert('Erro ao salvar o produto.');
+      alert(t('dashboard.error_saving')); // <-- TEXTO TRADUZIDO
     }
   };
 
-  // 5. Função para Excluir
   const excluirProduto = async (id: number) => {
-    const confirmar = window.confirm("Tem certeza que deseja apagar este produto?");
+    const confirmar = window.confirm(t('dashboard.confirm_delete')); // <-- TEXTO TRADUZIDO
     if (!confirmar) return;
 
     try {
       await api.delete(`/products/${id}`);
-      alert("Produto excluído!");
-      carregarPerfilEProdutos(); // Recarrega a tabela
+      alert(t('dashboard.product_deleted')); // <-- TEXTO TRADUZIDO
+      carregarPerfilEProdutos(); 
     } catch (error) {
-      alert("Erro ao excluir o produto.");
+      alert(t('dashboard.error_deleting')); // <-- TEXTO TRADUZIDO
     }
   };
 
-  // 6. Preparar o formulário para edição
   const iniciarEdicao = (produto: Product) => {
     setProdutoEditando(produto);
     setNome(produto.name);
@@ -110,19 +104,13 @@ const Dashboard = () => {
   };
 
   const copiarLinkLoja = () => {
-  if (!user) return;
-  
-  // Monta o link real da vitrine com base no slug do lojista
-  const linkCompleto = `${window.location.origin}/loja/${user.store_slug}`;
-  
-  // Copia para a área de transferência do celular ou computador
-  navigator.clipboard.writeText(linkCompleto);
-  
-  alert("🔗 Link da sua vitrine copiado com sucesso!");
-};
+    if (!user) return;
+    const linkCompleto = `${window.location.origin}/loja/${user.store_slug}`;
+    navigator.clipboard.writeText(linkCompleto);
+    alert(t('dashboard.link_copied')); // <-- TEXTO TRADUZIDO
+  };
 
-  // Se ainda estiver carregando, mostra uma mensagem
-  if (!user) return <p style={{ textAlign: 'center', marginTop: '50px' }}>Carregando seu painel...</p>;
+  if (!user) return <p style={{ textAlign: 'center', marginTop: '50px' }}>{t('dashboard.loading')}</p>; // <-- TEXTO TRADUZIDO
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
@@ -130,17 +118,16 @@ const Dashboard = () => {
       {/* CABEÇALHO DO DASHBOARD */}
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #e5e7eb', paddingBottom: '20px', marginBottom: '20px' }}>
         <div>
-          <h1 style={{ margin: 0, color: '#1e3a8a' }}>Painel da Loja</h1>
-          <p style={{ margin: 0, color: '#6b7280' }}>Bem-vindo(a), {user.full_name}</p>
+          <h1 style={{ margin: 0, color: '#1e3a8a' }}>{t('dashboard.title')}</h1> {/* <-- TEXTO TRADUZIDO */}
+          <p style={{ margin: 0, color: '#6b7280' }}>{t('dashboard.welcome')}, {user.full_name}</p> {/* <-- TEXTO TRADUZIDO */}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           
-          {/* NOVO BOTÃO: COPIAR LINK */}
           <button 
             onClick={copiarLinkLoja}
             style={{ backgroundColor: '#10b981', color: '#fff', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
           >
-            🔗 Copiar Link da Loja
+            🔗 {t('dashboard.copy_link')} {/* <-- TEXTO TRADUZIDO */}
           </button>
 
           <a 
@@ -149,14 +136,14 @@ const Dashboard = () => {
             rel="noreferrer"
             style={{ backgroundColor: '#3b82f6', color: '#fff', padding: '10px 15px', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold' }}
           >
-            👀 Ver minha Vitrine
+            👀 {t('dashboard.view_store')} {/* <-- TEXTO TRADUZIDO */}
           </a>
 
           <button 
             onClick={() => { localStorage.clear(); window.location.href = '/login'; }}
             style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer' }}
           >
-            Sair
+            {t('dashboard.logout')} {/* <-- TEXTO TRADUZIDO */}
           </button>
         </div>
       </header>
@@ -164,40 +151,39 @@ const Dashboard = () => {
       {/* ÁREA DO FORMULÁRIO */}
       <section style={{ backgroundColor: '#f9fafb', padding: '20px', borderRadius: '8px', marginBottom: '30px', border: '1px solid #e5e7eb' }}>
         <h2 style={{ marginTop: 0, color: '#1f2937' }}>
-          {produtoEditando ? '✏️ Editar Produto' : '📦 Novo Produto'}
+          {produtoEditando ? `✏️ ${t('dashboard.edit_product')}` : `📦 ${t('dashboard.new_product')}`} {/* <-- TEXTO TRADUZIDO */}
         </h2>
         
         <form onSubmit={salvarProduto} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           <input 
-            type="text" placeholder="Nome do Produto (Ex: Bolo de Pote)" required
+            type="text" placeholder={t('dashboard.placeholder_name')} required
             value={nome} onChange={(e) => setNome(e.target.value)}
             style={{ flex: '1 1 200px', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
           />
           <input 
-            type="number" step="0.01" placeholder="Preço (Ex: 15.90)" required
+            type="number" step="0.01" placeholder={t('dashboard.placeholder_price')} required
             value={preco} onChange={(e) => setPreco(e.target.value)}
             style={{ flex: '1 1 100px', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
           />
           <input 
-            type="text" placeholder="Descrição rápida" required
+            type="text" placeholder={t('dashboard.placeholder_desc')} required
             value={descricao} onChange={(e) => setDescricao(e.target.value)}
             style={{ flex: '2 1 300px', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
           />
-
           <input 
-           type="url" placeholder="Link da Imagem do Produto (URL)" 
+           type="url" placeholder={t('dashboard.placeholder_image')} 
            value={imageUrl} onChange={(e) => setImageUrl(e.target.value)}
            style={{ flex: '1 1 100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }} 
           />
           
           <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
             <button type="submit" style={{ flex: 1, backgroundColor: '#10b981', color: 'white', padding: '10px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
-              {produtoEditando ? 'Atualizar Produto' : 'Cadastrar Produto'}
+              {produtoEditando ? t('dashboard.btn_update') : t('dashboard.btn_register')} {/* <-- TEXTO TRADUZIDO */}
             </button>
             
             {produtoEditando && (
               <button type="button" onClick={limparFormulario} style={{ flex: 1, backgroundColor: '#6b7280', color: 'white', padding: '10px', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
-                Cancelar Edição
+                {t('dashboard.btn_cancel')} {/* <-- TEXTO TRADUZIDO */}
               </button>
             )}
           </div>
@@ -206,36 +192,36 @@ const Dashboard = () => {
 
       {/* TABELA DE PRODUTOS */}
       <section>
-        <h2 style={{ color: '#1f2937' }}>Seus Produtos Cadastrados</h2>
+        <h2 style={{ color: '#1f2937' }}>{t('dashboard.your_products')}</h2> {/* <-- TEXTO TRADUZIDO */}
         
         {products.length === 0 ? (
-          <p style={{ color: '#6b7280' }}>Você ainda não tem produtos. Adicione o primeiro acima!</p>
+          <p style={{ color: '#6b7280' }}>{t('dashboard.no_products')}</p> 
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: '#fff', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
             <thead style={{ backgroundColor: '#f3f4f6', textAlign: 'left' }}>
               <tr>
-                <th style={{ padding: '15px', borderBottom: '1px solid #e5e7eb' }}>Nome</th>
-                <th style={{ padding: '15px', borderBottom: '1px solid #e5e7eb' }}>Preço</th>
-                <th style={{ padding: '15px', borderBottom: '1px solid #e5e7eb' }}>Ações</th>
+                <th style={{ padding: '15px', borderBottom: '1px solid #e5e7eb' }}>{t('dashboard.col_name')}</th> {/* <-- TEXTO TRADUZIDO */}
+                <th style={{ padding: '15px', borderBottom: '1px solid #e5e7eb' }}>{t('dashboard.col_price')}</th> {/* <-- TEXTO TRADUZIDO */}
+                <th style={{ padding: '15px', borderBottom: '1px solid #e5e7eb' }}>{t('dashboard.col_actions')}</th> {/* <-- TEXTO TRADUZIDO */}
               </tr>
             </thead>
             <tbody>
               {products.map(produto => (
                 <tr key={produto.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
                   <td style={{ padding: '15px', color: '#111827' }}>{produto.name}</td>
-                  <td style={{ padding: '15px', color: '#059669', fontWeight: 'bold' }}>R$ {produto.price.toFixed(2)}</td>
+                  <td style={{ padding: '15px', color: '#059669', fontWeight: 'bold' }}>$ {produto.price.toFixed(2)}</td>
                   <td style={{ padding: '15px', display: 'flex', gap: '10px' }}>
                     <button 
                       onClick={() => iniciarEdicao(produto)}
                       style={{ backgroundColor: '#f59e0b', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}
                     >
-                      Editar
+                      {t('dashboard.btn_edit')} {/* <-- TEXTO TRADUZIDO */}
                     </button>
                     <button 
                       onClick={() => excluirProduto(produto.id)}
                       style={{ backgroundColor: '#ef4444', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}
                     >
-                      Excluir
+                      {t('dashboard.btn_delete')} {/* <-- TEXTO TRADUZIDO */}
                     </button>
                   </td>
                 </tr>

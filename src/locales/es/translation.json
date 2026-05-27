@@ -1,0 +1,11 @@
+{
+  "login_title": "Catálogo - Iniciar sesión",
+  "email_label": "Correo electrónico:",
+  "password_label": "Contraseña:",
+  "button_enter": "Ingresar",
+  "no_account": "¿Aún no tienes una tienda?",
+  "create_account": "Crea tu cuenta gratis",
+  "test_connection": "Probar conexión a la API",
+  "login_success": "¡Inicio de sesión exitoso!",
+  "login_error": "Error al iniciar sesión. Verifica tu correo y contraseña."
+}

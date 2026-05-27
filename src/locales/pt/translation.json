@@ -1,0 +1,11 @@
+{
+  "login_title": "Catálogo Comercial - Login",
+  "email_label": "E-mail:",
+  "password_label": "Senha:",
+  "button_enter": "Entrar no Sistema",
+  "no_account": "Ainda não tem uma loja?",
+  "create_account": "Crie sua conta de graça",
+  "test_connection": "Testar Conexão com a API",
+  "login_success": "Login realizado com sucesso!",
+  "login_error": "Erro ao entrar. Verifique seu e-mail e senha."
+}

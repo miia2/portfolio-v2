@@ -1,39 +1,36 @@
-import { useState, useEffect } from 'react'; // Agrupei os imports do React
+import { useState, useEffect } from 'react';
 import type { MensagemContato } from '../types';
-// O "../" diz para o sistema: saia da pasta atual e procure na pasta de cima
 import api from '../services/api';
 
+// 1. IMPORTAMOS O HOOK DE TRADUÇÃO
+import { useTranslation } from 'react-i18next';
+
 const Home = () => {
-  // 1. ESTADOS (States) sempre no topo do componente
+  // 2. ATIVAMOS A FUNÇÃO DE TRADUÇÃO (t)
+  const { t } = useTranslation();
+
   const [formulario, setFormulario] = useState<MensagemContato>({
     nome: '',
     email: '',
     mensagem: ''
   });
 
-  // 2. FUNÇÕES DE LÓGICA (Moram aqui dentro agora)
   const testarConexao = async () => {
     try {
-      // Isso vai tentar falar com o seu FastAPI
       const resposta = await api.get('/'); 
       console.log("Conexão ok:", resposta.data);
     } catch (error) {
-      // Como ainda não criamos a rota "/" no Python, 
-      // ele pode dar erro 404, mas se aparecer no console, a conexão funcionou!
       console.log("API alcançada, mas rota não encontrada (404).");
     }
   };
 
-  // 3. EFEITOS (Executam quando a página carrega)
   useEffect(() => {
     testarConexao();
-  }, []); // O colchete vazio garante que só executa uma vez
+  }, []);
 
   const enviarMensagem = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // DICA: No futuro, você trocará esse link do Formspree 
-      // pela sua própria rota no FastAPI!
       const resposta = await fetch("https://formspree.io/f/xwvrzagb", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -41,26 +38,30 @@ const Home = () => {
       });
 
       if (resposta.ok) {
-        alert(`Sucesso, ${formulario.nome}! Mensagem enviada.`);
+        // 3. ATÉ OS ALERTAS PODEM SER TRADUZIDOS!
+        // Passamos o nome dinamicamente para dentro da tradução
+        alert(t('alertas.sucesso', { nome: formulario.nome }));
         setFormulario({ nome: '', email: '', mensagem: '' });
       }
     } catch (erro) {
-      alert("Erro de conexão.");
+      alert(t('alertas.erro'));
     }
   };
 
   return (
     <div className="container">
       <header>
-        <h1>Mírian Gomes</h1>
-        <h2>Engenheira de Software Full-Stack</h2>
+        {/* 4. SUBSTITUÍMOS OS TEXTOS FIXOS PELAS CHAVES */}
+        <h1>{t('header.nome')}</h1>
+        <h2>{t('header.profissao')}</h2>
       </header>
       <main>
         <section className="secao">
-            <h2>📩 Contato Seguro</h2>
+            <h2>📩 {t('contato.titulo')}</h2>
             <form onSubmit={enviarMensagem} className="form-contato">
-                {/* Aqui vão seus inputs... */}
-                <button type="submit">Enviar Mensagem</button>
+                {/* Exemplo de como ficaria em um input: */}
+                {/* <input placeholder={t('contato.placeholder_nome')} /> */}
+                <button type="submit">{t('contato.botao_enviar')}</button>
             </form>
         </section>
       </main>

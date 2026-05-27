@@ -1,0 +1,11 @@
+{
+  "login_title": "Catalog Commercial - Login",
+  "email_label": "Email:",
+  "password_label": "Password:",
+  "button_enter": "Sign In",
+  "no_account": "Don't have a store yet?",
+  "create_account": "Create your account for free",
+  "test_connection": "Test API Connection",
+  "login_success": "Login successful!",
+  "login_error": "Login failed. Check your email and password."
+}
