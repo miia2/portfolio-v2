@@ -4,20 +4,29 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 
 import translationPT from './locales/pt/translation.json';
 import translationEN from './locales/en/translation.json';
+import translationES from './locales/es/translation.json';
 
 const resources = {
+  // Mapeamos tanto a sigla curta quanto a sigla com região para o mesmo arquivo
   pt: { translation: translationPT },
-  en: { translation: translationEN }
+  'pt-BR': { translation: translationPT },
+  
+  en: { translation: translationEN },
+  'en-US': { translation: translationEN },
+  
+  es: { translation: translationES },
+  'es-ES': { translation: translationES }
 };
 
 i18n
-  .use(LanguageDetector) // Detecta o idioma do navegador do usuário
-  .use(initReactI18next) // Passa a instância do i18n para o React
+  .use(LanguageDetector) 
+  .use(initReactI18next) 
   .init({
     resources,
-    fallbackLng: 'en', // Se ele não achar o idioma do cliente, usa EN por padrão
+    lng: 'pt', // <-- FORÇA o sistema a começar em português para você testar localmente
+    fallbackLng: 'pt', // Se der erro em algo, volta para o português
     interpolation: {
-      escapeValue: false // O React já protege contra injeção de código (XSS)
+      escapeValue: false 
     }
   });
 
