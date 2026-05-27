@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next'; // 1. Importamos o tradutor
+import { useTranslation } from 'react-i18next'; 
 import api from '../services/api';
 
 interface Product {
@@ -19,7 +19,7 @@ interface StoreData {
 
 const Store = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { t } = useTranslation(); // 2. Iniciamos a função "t" (translate)
+  const { t } = useTranslation(); 
   
   const [store, setStore] = useState<StoreData | null>(null);
   const [erro, setErro] = useState(false);
@@ -40,7 +40,7 @@ const Store = () => {
   const handleOrderWhatsApp = (product: Product) => {
     if (!store) return;
     
-    // 3. Mensagem dinâmica! Passamos as variáveis {{name}} e {{price}} para o tradutor
+    // Passamos o nome e preço para dentro do JSON de tradução dinamicamente
     const mensagem = t('whatsapp_message', { 
       name: product.name, 
       price: product.price.toFixed(2) 
@@ -50,9 +50,8 @@ const Store = () => {
     window.open(url, '_blank');
   };
 
-  // 4. Trocando todos os textos fixos por t('nome_da_chave')
   if (erro) return <h2 style={{ textAlign: 'center', marginTop: '50px' }}>{t('store_not_found')}</h2>;
-  if (!store) return <p style={{ textAlign: 'center' }}>{t('loading_catalog')}</p>;
+  if (!store) return <p style={{ textAlign: 'center', marginTop: '50px' }}>{t('loading_catalog')}</p>;
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
@@ -65,16 +64,16 @@ const Store = () => {
         {store.products.map(product => (
           <div key={product.id} style={{ border: '1px solid #e5e7eb', borderRadius: '12px', padding: '20px', backgroundColor: '#fff', color: '#333' }}>
             <div style={{ width: '100%', height: '180px', backgroundColor: '#f3f4f6', borderRadius: '8px', marginBottom: '15px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {product.image_url ? (
-        <img 
-          src={product.image_url} 
-          alt={product.name} 
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-        />
-      ) : (
-        <span style={{ color: '#9ca3af', fontSize: '0.9rem' }}>{t('no_photo')}</span>
-      )}
-    </div>
+              {product.image_url ? (
+                <img 
+                  src={product.image_url} 
+                  alt={product.name} 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                <span style={{ color: '#9ca3af', fontSize: '0.9rem' }}>{t('no_photo')}</span>
+              )}
+            </div>
             <h3 style={{ marginTop: 0 }}>{product.name}</h3>
             <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>{product.description}</p>
             <h2 style={{ color: '#10b981' }}>R$ {product.price.toFixed(2)}</h2>
@@ -90,8 +89,10 @@ const Store = () => {
             </button>
           </div>
         ))}
-        {store.products.length === 0 && <p>{t('no_products')}</p>}
       </div>
+      {store.products.length === 0 && (
+        <p style={{ textAlign: 'center', color: '#6b7280', marginTop: '40px' }}>{t('no_products')}</p>
+      )}
     </div>
   );
 };
