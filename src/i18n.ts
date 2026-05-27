@@ -16,8 +16,8 @@ i18n
       es: { translation: translationES },
       'es-ES': { translation: translationES }
     },
-    lng: 'pt', // Força o idioma inicial como português
-    fallbackLng: 'pt',
+    lng: 'en', // Força o idioma inicial como português
+    fallbackLng: 'en',
     interpolation: {
       escapeValue: false 
     }
