@@ -1,14 +1,16 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next'; 
+import { useTranslation } from 'react-i18next'; // <-- 1. IMPORTA O HOOK DE TRADUÇÃO
 import api from '../services/api';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 interface Product {
   id: number;
   name: string;
-  price: number;
   description: string;
-  image_url?: string;
+  price: number;
+  image_url: string;
+  is_available: boolean;
 }
 
 interface StoreData {
@@ -17,81 +19,94 @@ interface StoreData {
   products: Product[];
 }
 
-const Store = () => {
+const Store: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { t } = useTranslation(); 
+  const { t } = useTranslation(); // <-- 2. ATIVA A FUNÇÃO t()
   
   const [store, setStore] = useState<StoreData | null>(null);
-  const [erro, setErro] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     const fetchStore = async () => {
       try {
         const response = await api.get(`/store/${slug}`);
         setStore(response.data);
-      } catch (error) {
-        console.error(error);
-        setErro(true);
+      } catch (err) {
+        console.error(err);
+        setError(true);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchStore();
+    if (slug) fetchStore();
   }, [slug]);
 
-  const handleOrderWhatsApp = (product: Product) => {
-    if (!store) return;
-    
-    // Passamos o nome e preço para dentro do JSON de tradução dinamicamente
-    const mensagem = t('whatsapp_message', { 
-      name: product.name, 
-      price: product.price.toFixed(2) 
-    });
-    
-    const url = `https://wa.me/${store.whatsapp_number}?text=${encodeURIComponent(mensagem)}`;
+  if (loading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '50px', color: '#fff' }}>
+        <h2>{t('loading_catalog')}</h2> {/* <-- TRADUZIDO */}
+      </div>
+    );
+  }
+
+  if (error || !store) {
+    return (
+      <div style={{ textAlign: 'center', padding: '50px', color: '#fff' }}>
+        <h2>{t('store_not_found')}</h2> {/* <-- TRADUZIDO */}
+      </div>
+    );
+  }
+
+  const handleOrder = (product: Product) => {
+    // Monta a mensagem usando o formato do i18next
+    const message = t('whatsapp_message', { name: product.name, price: product.price.toFixed(2) });
+    const cleanNumber = store.whatsapp_number.replace(/\D/g, '');
+    const url = `https://api.whatsapp.com/send?phone=${cleanNumber}&text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
 
-  if (erro) return <h2 style={{ textAlign: 'center', marginTop: '50px' }}>{t('store_not_found')}</h2>;
-  if (!store) return <p style={{ textAlign: 'center', marginTop: '50px' }}>{t('loading_catalog')}</p>;
-
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-      <header style={{ textAlign: 'center', marginBottom: '40px' }}>
-        <h1 style={{ color: '#2563eb' }}>{store.full_name}</h1>
-        <p>{t('order_prompt')}</p>
-      </header>
+    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', color: '#fff' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+        <h1>{store.full_name}</h1>
+        <LanguageSwitcher />
+      </div>
+      
+      <p style={{ textAlign: 'center', color: '#9ca3af', marginBottom: '40px' }}>
+        {t('order_prompt')} {/* <-- TRADUZIDO */}
+      </p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
-        {store.products.map(product => (
-          <div key={product.id} style={{ border: '1px solid #e5e7eb', borderRadius: '12px', padding: '20px', backgroundColor: '#fff', color: '#333' }}>
-            <div style={{ width: '100%', height: '180px', backgroundColor: '#f3f4f6', borderRadius: '8px', marginBottom: '15px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {store.products.length === 0 ? (
+        <p style={{ textAlign: 'center', color: '#6b7280' }}>{t('no_products')}</p> 
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+          {store.products.map((product) => (
+            <div key={product.id} style={{ background: '#1f2937', padding: '15px', borderRadius: '8px' }}>
               {product.image_url ? (
                 <img 
                   src={product.image_url} 
                   alt={product.name} 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  style={{ width: '100%', height: '150px', objectFit: 'cover', borderRadius: '4px' }} 
                 />
               ) : (
-                <span style={{ color: '#9ca3af', fontSize: '0.9rem' }}>{t('no_photo')}</span>
+                <div style={{ height: '150px', background: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', color: '#9ca3af' }}>
+                  {t('no_photo')} {/* <-- TRADUZIDO */}
+                </div>
               )}
+              <h3 style={{ marginTop: '10px' }}>{product.name}</h3>
+              <p style={{ color: '#9ca3af', fontSize: '14px', height: '40px', overflow: 'hidden' }}>{product.description}</p>
+              <p style={{ fontWeight: 'bold', color: '#10b981', margin: '10px 0' }}>R$ {product.price.toFixed(2)}</p>
+              
+              <button 
+                onClick={() => handleOrder(product)}
+                style={{ width: '100%', padding: '10px', background: '#25d366', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                {t('order_button')} {/* <-- TRADUZIDO */}
+              </button>
             </div>
-            <h3 style={{ marginTop: 0 }}>{product.name}</h3>
-            <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>{product.description}</p>
-            <h2 style={{ color: '#10b981' }}>R$ {product.price.toFixed(2)}</h2>
-            
-            <button 
-              onClick={() => handleOrderWhatsApp(product)}
-              style={{
-                width: '100%', padding: '12px', backgroundColor: '#25D366', color: 'white', 
-                border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer'
-              }}
-            >
-              {t('order_button')}
-            </button>
-          </div>
-        ))}
-      </div>
-      {store.products.length === 0 && (
-        <p style={{ textAlign: 'center', color: '#6b7280', marginTop: '40px' }}>{t('no_products')}</p>
+          ))}
+        </div>
       )}
     </div>
   );
