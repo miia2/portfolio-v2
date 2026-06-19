@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { MensagemContato } from '../types';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import { useQuery } from '@tanstack/react-query'; // Importamos o React Query
 
 const Home = () => {
   const { t } = useTranslation();
@@ -13,18 +14,16 @@ const Home = () => {
     mensagem: ''
   });
 
-  const testarConexao = async () => {
-    try {
-      const resposta = await api.get('/'); 
+  // Substitui o useEffect e o estado manual de conexão de forma profissional
+  const { data: conexaoStatus } = useQuery({
+    queryKey: ['api-status'],
+    queryFn: async () => {
+      const resposta = await api.get('/');
       console.log("Conexão ok:", resposta.data);
-    } catch (error) {
-      console.log("API alcançada, mas rota não encontrada (404).");
-    }
-  };
-
-  useEffect(() => {
-    testarConexao();
-  }, []);
+      return resposta.data;
+    },
+    retry: false // Se falhar de primeira, não precisa ficar tentando
+  });
 
   const enviarMensagem = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +35,6 @@ const Home = () => {
       });
 
       if (resposta.ok) {
-        // Alerta traduzido passando o nome de quem enviou como dado dinâmico
         alert(t('contact_success', { nome: formulario.nome }));
         setFormulario({ nome: '', email: '', mensagem: '' });
       }
@@ -52,6 +50,8 @@ const Home = () => {
       <header style={{ textAlign: 'center', marginBottom: '40px', marginTop: '20px' }}>
         <h1>{t('home_title')}</h1>
         <h2>{t('home_subtitle')}</h2>
+        {/* Mostra um feedback visual discreto se a API estiver online */}
+        {conexaoStatus && <p style={{ color: '#10b981', fontSize: '12px' }}>● Sistema Online</p>}
       </header>
       
       <main>
@@ -73,7 +73,7 @@ const Home = () => {
             <div>
               <label style={{ display: 'block', marginBottom: '5px' }}>{t('contact_email_label')}</label>
               <input 
-                type="email"
+                type="type"
                 value={formulario.email}
                 onChange={(e) => setFormulario({ ...formulario, email: e.target.value })}
                 required

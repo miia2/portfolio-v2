@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import { ProductImage } from '../components/ProductImage'; // 1. IMPORTAÇÃO DO NOVO COMPONENTE
 
 interface Product {
   id: number;
@@ -21,7 +22,7 @@ interface StoreData {
 
 const Store: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { t } = useTranslation(); // Ativando a tradução
+  const { t } = useTranslation(); 
   
   const [store, setStore] = useState<StoreData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,14 +46,10 @@ const Store: React.FC = () => {
   const handleOrder = (product: Product) => {
     if (!store) return;
 
-    // Remove caracteres não numéricos do WhatsApp
     const cleanPhone = store.whatsapp_number.replace(/\D/g, '');
-    
-    // Puxa a mensagem traduzida do arquivo JSON injetando o nome e preço do produto
     const text = t('whatsapp_message', { name: product.name, price: product.price.toFixed(2) });
     const encodedText = encodeURIComponent(text);
     
-    // Redireciona para o WhatsApp
     window.open(`https://wa.me/${cleanPhone}?text=${encodedText}`, '_blank');
   };
 
@@ -75,7 +72,6 @@ const Store: React.FC = () => {
 
   return (
     <div style={{ background: '#0f172a', minHeight: '100vh', color: '#fff', padding: '20px' }}>
-      {/* Botões de idioma no topo da vitrine pública */}
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
         <LanguageSwitcher />
       </div>
@@ -103,17 +99,14 @@ const Store: React.FC = () => {
                   border: '1px solid #334155'
                 }}
               >
-                {product.image_url ? (
-                  <img 
-                    src={product.image_url} 
-                    alt={product.name} 
-                    style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px' }}
-                  />
-                ) : (
-                  <div style={{ width: '100px', height: '100px', background: '#475569', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: '#cbd5e1' }}>
-                    {t('no_photo')}
-                  </div>
-                )}
+                
+                {/* 2. SUBSTITUIÇÃO DA TAG ANTIGA PELO COMPONENTE COM LAZY LOADING */}
+                <ProductImage 
+                  src={product.image_url} 
+                  alt={product.name}
+                  className="w-24 h-24 rounded-lg flex-shrink-0" // Classes do Tailwind para fixar tamanho (100px aprox)
+                  // Nota: Caso você não use Tailwind no projeto, pode passar inline styles na div interna do ProductImage se preferir.
+                />
 
                 <div style={{ flex: 1 }}>
                   <h3 style={{ fontSize: '1.3rem', marginBottom: '5px' }}>{product.name}</h3>
