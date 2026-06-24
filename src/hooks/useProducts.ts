@@ -5,18 +5,24 @@ import { useAuthStore } from '../store/authStore';
 const API_URL = 'http://127.0.0.1:8000/api/v1';
 
 // 1. Hook para BUSCAR os produtos do lojista logado (Substitui o useEffect)
-export function useMyProducts() {
+export function useMyProducts(page: number, search: string) {
   const token = useAuthStore((state) => state.token);
 
   return useQuery({
-    queryKey: ['my-products'], // Identificador único deste cache no React Query
+    // Adicionamos page e search na queryKey para o React Query saber que cada página/busca tem um cache diferente!
+    queryKey: ['my-products', page, search], 
     queryFn: async () => {
-      const response = await axios.get(`${API_URL}/products/me`, {
+      const response = await axios.get(`http://127.0.0.1:8000/api/v1/products/me`, {
         headers: { Authorization: `Bearer ${token}` },
+        params: {
+          page: page,
+          size: 20,
+          search: search || undefined // Se estiver vazio, não envia o parâmetro
+        }
       });
-      return response.data;
+      return response.data; // Agora response.data terá .items e .total
     },
-    enabled: !!token, // Só roda a busca se o usuário estiver logado (token existir)
+    enabled: !!token,
   });
 }
 
