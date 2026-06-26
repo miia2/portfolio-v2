@@ -3,8 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next'; 
 import LanguageSwitcher from '../components/LanguageSwitcher';
-// 1. Importe o hook do seu Zustand Store
 import { useAuthStore } from '../store/authStore';
+import { toast } from 'sonner'; // 1. Importa o toast da Sonner
 
 const Login: React.FC = () => {
   const { t } = useTranslation(); 
@@ -12,45 +12,42 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-
-  // 2. Puxe a função de login de dentro do Zustand
   const loginGlobal = useAuthStore((state) => state.login);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const params = new URLSearchParams();
-      // O seu backend exige 'username' (OAuth2 do FastAPI), mantemos como estava!
       params.append('username', email);
       params.append('password', password);
 
-      // Lembre-se que agora a rota mudou na API modular (/api/v1/auth/login)
-      // Se a sua base URL no 'services/api' já terminar em /api/v1, use apenas '/auth/login'
       const response = await api.post('/auth/login', params);
-      
       const { access_token, store_slug } = response.data; 
  
-      // 3. Em vez de salvar manualmente no localStorage, chame a função do Zustand.
-      // Ela já salva no localStorage e avisa o aplicativo inteiro que o usuário logou!
       loginGlobal(access_token, store_slug);
 
-      alert(t('login_success'));
+      // 2. Substituído o alert antigo por toast de sucesso
+      toast.success(t('login_success'));
       navigate('/dashboard'); 
       
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert(t('login_error'));
+      // Extrai o erro do FastAPI se houver, se não usa a tradução padrão
+      const msgErro = error.response?.data?.detail || t('login_error');
+      // 3. Substituído por toast de erro
+      toast.error(msgErro);
     }
   };
 
   const testarConexao = async () => {
     try {
-      // Como o main.py agora agrupa tudo no prefixo da API, testamos o status da raiz da API
       await api.get('/'); 
-      alert("Conexão com a API está ativa!");
+      // 4. Toast informativo/sucesso para o teste de conexão
+      toast.success("Conexão com a API está ativa!");
     } catch (error) {
       console.error("Connection Error:", error);
-      alert("O servidor Python está desligado ou o CORS bloqueou o acesso.");
+      // 5. Toast de erro para falha de conexão
+      toast.error("O servidor Python está desligado ou o CORS bloqueou o acesso.");
     }
   };
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next'; 
 import { useRegisterUser } from '../hooks/useAuth';
+import { toast } from 'sonner'; // 1. Importa o toast da Sonner
 
 const Register: React.FC = () => {
   const navigate = useNavigate(); 
@@ -34,12 +35,14 @@ const Register: React.FC = () => {
     e.preventDefault();
     registerMutation.mutate(formData, {
       onSuccess: () => {
-        alert(t('register_success'));
+        // 2. Substituído o alert por toast.success
+        toast.success(t('register_success'));
         navigate('/login'); 
       },
       onError: (error: any) => {
         const mensagemErro = error.response?.data?.detail || t('register_error_default');
-        alert(mensagemErro);
+        // 3. Substituído o alert por toast.error
+        toast.error(mensagemErro);
       }
     });
   };
@@ -52,13 +55,11 @@ const Register: React.FC = () => {
       
       <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
         
-        {/* Campos adicionados de volta */}
         <input type="text" name="full_name" placeholder={t('name_label')} value={formData.full_name} onChange={handleChange} required style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }} />
         <input type="email" name="email" placeholder={t('email_label')} value={formData.email} onChange={handleChange} required style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }} />
         <input type="password" name="password" placeholder={t('password_label')} value={formData.password} onChange={handleChange} required style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }} />
         <input type="text" name="whatsapp_number" placeholder={t('whatsapp_label')} value={formData.whatsapp_number} onChange={handleChange} required style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }} />
 
-        {/* Campo do Slug */}
         <div>
           <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>{t('slug_label')}</label>
           <input 
