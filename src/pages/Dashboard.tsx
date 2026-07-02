@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../store/authStore';
 import { ProductImage } from '../components/ProductImage';
+import { useNavigate } from 'react-router-dom';
 
 interface Product {
   id: number;
@@ -24,6 +25,8 @@ const Dashboard = () => {
   const queryClient = useQueryClient();
   const { token, logout } = useAuthStore();
 
+  const navigate = useNavigate();
+
   const [user, setUser] = useState<UserData | null>(null);
   
   // Estados do formulário
@@ -33,28 +36,32 @@ const Dashboard = () => {
   const [imagemArquivo, setImagemArquivo] = useState<File | null>(null); // Guardará o arquivo binário da foto
   const [produtoEditando, setProdutoEditando] = useState<Product | null>(null);
 
-  // 1. Carrega dados do perfil do Usuário (Roda uma única vez)
+  // 1. Carrega dados do perfil do Usuário (Com redirecionamento em caso de erro)
   useEffect(() => {
     const carregarPerfil = async () => {
       try {
-        const resUser = await api.get('/users/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const resUser = await api.get('/users/me'); // O interceptor já vai cuidar do Header!
         setUser(resUser.data);
       } catch (error) {
         console.error(t('dash_error_loading'), error);
+        // Se der erro de autenticação (ex: token inválido ou expirado), desloga e manda pro login
+        logout();
+        navigate('/login'); 
       }
     };
-    if (token) carregarPerfil();
-  }, [token, t]);
 
-  // 2. React Query: Busca automática dos produtos com gerenciamento de Cache
+    if (token) {
+      carregarPerfil();
+    } else {
+      navigate('/login'); // Se não tem token nenhum, nem tenta carregar, vai direto pro login
+    }
+  }, [token, t, navigate, logout]);
+
+  // 2. React Query: Busca automática dos produtos bem mais limpa
   const { data: products = [], isLoading: carregandoProdutos } = useQuery<Product[]>({
     queryKey: ['my-products'],
     queryFn: async () => {
-      const res = await api.get('/products/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get('/products/me'); // Sem precisar passar o header na mão!
       return res.data;
     },
     enabled: !!token,
