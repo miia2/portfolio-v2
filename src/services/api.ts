@@ -1,17 +1,18 @@
 import axios from 'axios';
 
 const api = axios.create({
-  // O Vite usa import.meta.env para ler variáveis de ambiente.
-  // Se existir um link de produção, ele usa. Se não, cai no localhost.
-  baseURL: import.meta.env.VITE_API_URL || 'https://api-catalogo-digital.onrender.com/api/v1',
+  baseURL: 'https://api-catalogo-digital.onrender.com/api/v1',
 });
 
+// INTERCEPTOR MÁGICO: Ele lê o token do localStorage bem na hora do clique e injeta na requisição
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('@Ludus:token');
+  const token = localStorage.getItem('access_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
+}, (error) => {
+  return Promise.reject(error);
 });
 
 export default api;
