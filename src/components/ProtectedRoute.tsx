@@ -1,18 +1,18 @@
-import { type ReactNode } from 'react'; // Importação nova
+import { type ReactNode } from 'react'; 
 import { Navigate } from 'react-router-dom';
 
 interface ProtectedRouteProps {
-  children: ReactNode; // Trocamos JSX.Element por ReactNode
+  children: ReactNode; 
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const token = localStorage.getItem('@Ludus:token');
+  // CORRIGIDO: Agora puxa a mesma chave salva pelo Zustand e lida pelo Axios
+  const token = localStorage.getItem('access_token');
 
   if (!token) {
     return <Navigate to="/login" replace />;
   }
 
-  // No TypeScript moderno, precisamos garantir que o retorno seja um JSX
   return <>{children}</>; 
 };
 
