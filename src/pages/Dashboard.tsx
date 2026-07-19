@@ -40,7 +40,7 @@ const Dashboard = () => {
   useEffect(() => {
     const carregarPerfil = async () => {
       try {
-        const resUser = await api.get('/users/me'); // O interceptor já vai cuidar do Header!
+        const resUser = await api.get('/auth/me'); // <-- Ajustado de '/users/me' para '/auth/me'
         setUser(resUser.data);
       } catch (error) {
         console.error(t('dash_error_loading'), error);
