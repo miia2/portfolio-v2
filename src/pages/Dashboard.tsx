@@ -57,12 +57,15 @@ const Dashboard = () => {
     }
   }, [token, t, navigate, logout]);
 
-  // 2. React Query: Busca automática dos produtos bem mais limpa
+  // 2. React Query: Busca automática dos produtos mapeando a paginação do backend
   const { data: products = [], isLoading: carregandoProdutos } = useQuery<Product[]>({
     queryKey: ['my-products'],
     queryFn: async () => {
-      const res = await api.get('/products/me'); // Sem precisar passar o header na mão!
-      return res.data;
+      const res = await api.get('/products/me?page=1&size=50'); // Envia parâmetros de paginação padrão
+      
+      // Se o backend retornar o objeto paginado com a chave 'items', extraímos ela.
+      // Caso contrário (se retornar array puro), usamos o res.data direto.
+      return res.data.items ? res.data.items : res.data;
     },
     enabled: !!token,
   });
@@ -154,12 +157,15 @@ const Dashboard = () => {
     alert(t('dash_link_copied'));
   };
 
-  const executarLogout = () => {
+  const ejecutarLogout = () => {
     logout(); // Chama a limpeza global do Zustand (Limpa localStorage e estados)
     window.location.href = '/login';
   };
 
-  if (!user || carregandoProdutos) return <p style={{ textAlign: 'center', marginTop: '50px' }}>{t('dash_loading')}</p>;
+  // Se o perfil do usuário ainda não chegou da API, bloqueia a tela inteira com o loading genérico
+  if (!user) {
+    return <p style={{ textAlign: 'center', marginTop: '50px' }}>{t('dash_loading')}</p>;
+  }
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
@@ -188,7 +194,7 @@ const Dashboard = () => {
           </a>
 
           <button 
-            onClick={executarLogout}
+            onClick={ejecutarLogout}
             style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
           >
             {t('dash_logout')}
@@ -218,7 +224,7 @@ const Dashboard = () => {
             style={{ flex: '2 1 300px', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
           />
           
-          {/* INPUT PROFISSIONAL: Upload de arquivo local do computador/celular */}
+          {/* Upload de arquivo local do computador/celular */}
           <div style={{ flex: '1 1 100%', display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <label style={{ fontSize: '14px', color: '#4b5563', fontWeight: '500' }}>Imagem do Produto:</label>
             <input 
@@ -251,7 +257,10 @@ const Dashboard = () => {
       <section>
         <h2 style={{ color: '#1f2937' }}>{t('dash_your_products')}</h2>
         
-        {products.length === 0 ? (
+        {/* Tratamento isolado do carregamento apenas na área dos produtos */}
+        {carregandoProdutos ? (
+          <p style={{ color: '#6b7280' }}>{t('dash_loading')}</p>
+        ) : products.length === 0 ? (
           <p style={{ color: '#6b7280' }}>{t('no_products')}</p> 
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: '#fff', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
@@ -267,7 +276,6 @@ const Dashboard = () => {
               {products.map(produto => (
                 <tr key={produto.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
                   <td style={{ padding: '15px' }}>
-                    {/* Renderiza a imagem usando o componente com Lazy Loading e efeito skeleton */}
                     {produto.image_url ? (
                       <ProductImage 
                         src={produto.image_url} 
