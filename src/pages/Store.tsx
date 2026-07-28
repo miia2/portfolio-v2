@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import LanguageSwitcher from '../components/LanguageSwitcher';
-import { ProductImage } from '../components/ProductImage'; // 1. IMPORTAÇÃO DO NOVO COMPONENTE
+import { ProductImage } from '../components/ProductImage';
 
 interface Product {
   id: number;
@@ -31,10 +31,22 @@ const Store: React.FC = () => {
   useEffect(() => {
     const fetchStoreCatalog = async () => {
       try {
-        const response = await api.get(`/store/${slug}`);
-        setStore(response.data);
+        // CORREÇÃO 1: Rota ajustada para /products/store/{slug}
+        const response = await api.get(`/products/store/${slug}`);
+        
+        // CORREÇÃO 2: Mapeia o formato que o backend envia (store_info + products_pagination)
+        const data = response.data;
+        if (data && data.store_info) {
+          setStore({
+            full_name: data.store_info.full_name,
+            whatsapp_number: data.store_info.whatsapp_number,
+            products: data.products_pagination ? data.products_pagination.items : []
+          });
+        } else {
+          setStore(data);
+        }
       } catch (err) {
-        console.error(err);
+        console.error("Erro ao carregar catálogo:", err);
         setError(true);
       } finally {
         setLoading(false);
@@ -99,13 +111,10 @@ const Store: React.FC = () => {
                   border: '1px solid #334155'
                 }}
               >
-                
-                {/* 2. SUBSTITUIÇÃO DA TAG ANTIGA PELO COMPONENTE COM LAZY LOADING */}
                 <ProductImage 
                   src={product.image_url} 
                   alt={product.name}
-                  className="w-24 h-24 rounded-lg flex-shrink-0" // Classes do Tailwind para fixar tamanho (100px aprox)
-                  // Nota: Caso você não use Tailwind no projeto, pode passar inline styles na div interna do ProductImage se preferir.
+                  style={{ width: '96px', height: '96px', borderRadius: '8px', objectFit: 'cover' }}
                 />
 
                 <div style={{ flex: 1 }}>

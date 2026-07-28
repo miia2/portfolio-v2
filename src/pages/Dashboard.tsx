@@ -70,29 +70,25 @@ const Dashboard = () => {
     enabled: !!token,
   });
 
-  // 3. React Query: Mutation para Salvar / Editar Produto (Multipart Form Data para suportar arquivos)
-  const salvarProdutoMutation = useMutation({
-    mutationFn: async (formData: FormData) => {
-      if (produtoEditando) {
-        return await api.put(`/products/${produtoEditando.id}`, formData, {
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
-        });
-      } else {
-        return await api.post('/products/', formData, {
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
-        });
-      }
-    },
-    onSuccess: () => {
-      alert(produtoEditando ? t('dash_product_updated') : t('dash_product_created'));
-      limparFormulario();
-      // Atualiza o cache da tabela de produtos instantaneamente em segundo plano
-      queryClient.invalidateQueries({ queryKey: ['my-products'] });
-    },
-    onError: () => {
-      alert(t('dash_error_saving'));
+  // React Query: Mutation limpa para Salvar / Editar Produto
+const salvarProdutoMutation = useMutation({
+  mutationFn: async (formData: FormData) => {
+    if (produtoEditando) {
+      return await api.put(`/products/${produtoEditando.id}`, formData);
+    } else {
+      return await api.post('/products/', formData);
     }
-  });
+  },
+  onSuccess: () => {
+    alert(produtoEditando ? t('dash_product_updated') : t('dash_product_created'));
+    limparFormulario();
+    queryClient.invalidateQueries({ queryKey: ['my-products'] });
+  },
+  onError: (error) => {
+    console.error("Erro ao salvar produto:", error);
+    alert(t('dash_error_saving'));
+  }
+});
 
   // 4. React Query: Mutation para Excluir Produto
   const excluirProdutoMutation = useMutation({
