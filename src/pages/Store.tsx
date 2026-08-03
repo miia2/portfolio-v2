@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import api from '../services/api';
+import api from '../services/api'; // Ajuste o caminho de importação se o seu services/api estiver na mesma pasta ou subpasta
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { ProductImage } from '../components/ProductImage';
 
@@ -10,7 +10,7 @@ interface Product {
   name: string;
   description: string;
   price: number;
-  image_url: string;
+  image_url?: string;
   is_available: boolean;
 }
 
@@ -29,30 +29,36 @@ const Store: React.FC = () => {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-  const fetchStoreCatalog = async () => {
-    try {
-      const response = await api.get(`/store/${slug}`);
-      const data = response.data;
+    const fetchStoreCatalog = async () => {
+      try {
+        const response = await api.get(`/store/${slug}`);
+        const data = response.data;
 
-      // 🌟 Extrai os produtos de products_pagination.items se existir, 
-      // ou usa a lista direta como fallback
-      const produtosExtraidos = data.products_pagination?.items || data.products || [];
+        // Imprime no console F12 do navegador para verificar o formato exato da resposta
+        console.log("📦 Dados recebidos da API do catálogo:", data);
 
-      setStore({
-        full_name: data.store_info?.full_name || data.full_name || '',
-        whatsapp_number: data.store_info?.whatsapp_number || data.whatsapp_number || '',
-        products: produtosExtraidos
-      });
-    } catch (err) {
-      console.error("Erro ao carregar catálogo:", err);
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+        if (data && data.store_info) {
+          // Extrai a lista de produtos da paginação (products_pagination.items) ou do array direto
+          const listaProdutos = data.products_pagination?.items || data.products || [];
 
-  if (slug) fetchStoreCatalog();
-}, [slug]);
+          setStore({
+            full_name: data.store_info.full_name || 'Loja',
+            whatsapp_number: data.store_info.whatsapp_number || '',
+            products: listaProdutos
+          });
+        } else {
+          setError(true);
+        }
+      } catch (err) {
+        console.error("❌ Erro ao carregar catálogo da loja:", err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (slug) fetchStoreCatalog();
+  }, [slug]);
 
   const handleOrder = (product: Product) => {
     if (!store) return;
@@ -110,11 +116,18 @@ const Store: React.FC = () => {
                   border: '1px solid #334155'
                 }}
               >
-                <ProductImage 
-                  src={product.image_url} 
-                  alt={product.name}
-                  style={{ width: '96px', height: '96px', borderRadius: '8px', objectFit: 'cover' }}
-                />
+                {/* Imagem do produto com caixa padrão caso não haja URL */}
+                {product.image_url ? (
+                  <ProductImage 
+                    src={product.image_url} 
+                    alt={product.name}
+                    style={{ width: '96px', height: '96px', borderRadius: '8px', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <div style={{ width: '96px', height: '96px', borderRadius: '8px', backgroundColor: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
+                    📦
+                  </div>
+                )}
 
                 <div style={{ flex: 1 }}>
                   <h3 style={{ fontSize: '1.3rem', marginBottom: '5px' }}>{product.name}</h3>
