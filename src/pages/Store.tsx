@@ -29,31 +29,30 @@ const Store: React.FC = () => {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    const fetchStoreCatalog = async () => {
-      try {
-        // CORREÇÃO 1: Rota ajustada para /products/store/{slug}
-        const response = await api.get(`/products/store/${slug}`);
-        
-        // CORREÇÃO 2: Mapeia o formato que o backend envia (store_info + products_pagination)
-        const data = response.data;
-        if (data && data.store_info) {
-          setStore({
-            full_name: data.store_info.full_name,
-            whatsapp_number: data.store_info.whatsapp_number,
-            products: data.products_pagination ? data.products_pagination.items : []
-          });
-        } else {
-          setStore(data);
-        }
-      } catch (err) {
-        console.error("Erro ao carregar catálogo:", err);
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (slug) fetchStoreCatalog();
-  }, [slug]);
+  const fetchStoreCatalog = async () => {
+    try {
+      const response = await api.get(`/store/${slug}`);
+      const data = response.data;
+
+      // 🌟 Extrai os produtos de products_pagination.items se existir, 
+      // ou usa a lista direta como fallback
+      const produtosExtraidos = data.products_pagination?.items || data.products || [];
+
+      setStore({
+        full_name: data.store_info?.full_name || data.full_name || '',
+        whatsapp_number: data.store_info?.whatsapp_number || data.whatsapp_number || '',
+        products: produtosExtraidos
+      });
+    } catch (err) {
+      console.error("Erro ao carregar catálogo:", err);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (slug) fetchStoreCatalog();
+}, [slug]);
 
   const handleOrder = (product: Product) => {
     if (!store) return;
