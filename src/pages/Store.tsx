@@ -29,36 +29,34 @@ const Store: React.FC = () => {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    const fetchStoreCatalog = async () => {
-      try {
-        const response = await api.get(`/store/${slug}`);
-        const data = response.data;
+  const fetchStoreCatalog = async () => {
+    try {
+      const response = await api.get(`/store/${slug}`);
+      const data = response.data;
 
-        // Imprime no console F12 do navegador para verificar o formato exato da resposta
-        console.log("📦 Dados recebidos da API do catálogo:", data);
+      // Abramos o F12 -> Console para conferir o payload se necessário
+      console.log("Payload da API:", data);
 
-        if (data && data.store_info) {
-          // Extrai a lista de produtos da paginação (products_pagination.items) ou do array direto
-          const listaProdutos = data.products_pagination?.items || data.products || [];
+      if (data && data.store_info) {
+        // Mapeia a lista extraindo de products_pagination.items
+        const produtosExtraidos = data.products_pagination?.items || data.products || [];
 
-          setStore({
-            full_name: data.store_info.full_name || 'Loja',
-            whatsapp_number: data.store_info.whatsapp_number || '',
-            products: listaProdutos
-          });
-        } else {
-          setError(true);
-        }
-      } catch (err) {
-        console.error("❌ Erro ao carregar catálogo da loja:", err);
-        setError(true);
-      } finally {
-        setLoading(false);
+        setStore({
+          full_name: data.store_info.full_name,
+          whatsapp_number: data.store_info.whatsapp_number,
+          products: produtosExtraidos
+        });
       }
-    };
+    } catch (err) {
+      console.error("Erro ao carregar loja:", err);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    if (slug) fetchStoreCatalog();
-  }, [slug]);
+  if (slug) fetchStoreCatalog();
+}, [slug]);
 
   const handleOrder = (product: Product) => {
     if (!store) return;
