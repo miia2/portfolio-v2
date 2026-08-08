@@ -4,7 +4,7 @@ import api from '../services/api';
 import { useTranslation } from 'react-i18next'; 
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { useAuthStore } from '../store/authStore';
-import { toast } from 'sonner'; // 1. Importa o toast da Sonner
+import { toast } from 'sonner';
 
 const Login: React.FC = () => {
   const { t } = useTranslation(); 
@@ -23,18 +23,15 @@ const Login: React.FC = () => {
 
       const response = await api.post('/auth/login', params);
       const { access_token, store_slug } = response.data; 
- 
+
       loginGlobal(access_token, store_slug);
 
-      // 2. Substituído o alert antigo por toast de sucesso
       toast.success(t('login_success'));
       navigate('/dashboard'); 
       
     } catch (error: any) {
       console.error(error);
-      // Extrai o erro do FastAPI se houver, se não usa a tradução padrão
       const msgErro = error.response?.data?.detail || t('login_error');
-      // 3. Substituído por toast de erro
       toast.error(msgErro);
     }
   };
@@ -42,11 +39,9 @@ const Login: React.FC = () => {
   const testarConexao = async () => {
     try {
       await api.get('/'); 
-      // 4. Toast informativo/sucesso para o teste de conexão
       toast.success("Conexão com a API está ativa!");
     } catch (error) {
       console.error("Connection Error:", error);
-      // 5. Toast de erro para falha de conexão
       toast.error("O servidor Python está desligado ou o CORS bloqueou o acesso.");
     }
   };
@@ -75,9 +70,20 @@ const Login: React.FC = () => {
             value={password} 
             onChange={(e) => setPassword(e.target.value)} 
             required 
-            style={{ width: '100%', marginBottom: '20px' }}
+            style={{ width: '100%', marginBottom: '5px' }}
           />
+          
+          {/* 🌟 LINK PARA RECUPERAÇÃO DE SENHA */}
+          <div style={{ textAlign: 'right', marginBottom: '20px' }}>
+            <Link 
+              to="/forgot-password" 
+              style={{ color: '#3b82f6', fontSize: '0.85rem', textDecoration: 'none' }}
+            >
+              {t('forgot_password') || "Esqueceu sua senha?"}
+            </Link>
+          </div>
         </div>
+
         <button type="submit" style={{ width: '100%', padding: '10px', cursor: 'pointer' }}>
           {t('button_enter')}
         </button>
