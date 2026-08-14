@@ -4,7 +4,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Store from './pages/Store';
 import ForgotPassword from './pages/ForgotPassword'; // 🌟 Import da tela de solicitar e-mail
-import ResetPassword from './pages/ResetPassword';   // 🌟 Import da tela de redefinir senha
+import ResetPassword from './pages/ResetPassword';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'sonner';
 
