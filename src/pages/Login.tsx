@@ -60,7 +60,7 @@ const Login: React.FC = () => {
             value={email} 
             onChange={(e) => setEmail(e.target.value)} 
             required 
-            style={{ width: '100%', marginBottom: '10px' }}
+            style={{ width: '100%', marginBottom: '10px', padding: '8px', boxSizing: 'border-box' }}
           />
         </div>
         <div>
@@ -70,23 +70,56 @@ const Login: React.FC = () => {
             value={password} 
             onChange={(e) => setPassword(e.target.value)} 
             required 
-            style={{ width: '100%', marginBottom: '5px' }}
+            style={{ width: '100%', marginBottom: '12px', padding: '8px', boxSizing: 'border-box' }}
           />
-          
-          {/* 🌟 LINK PARA RECUPERAÇÃO DE SENHA */}
-          <div style={{ textAlign: 'right', marginBottom: '20px' }}>
-            <Link 
-              to="/forgot-password" 
-              style={{ color: '#3b82f6', fontSize: '0.85rem', textDecoration: 'none' }}
-            >
-              {t('forgot_password') || "Esqueceu sua senha?"}
-            </Link>
-          </div>
         </div>
 
-        <button type="submit" style={{ width: '100%', padding: '10px', cursor: 'pointer' }}>
+        <button 
+          type="submit" 
+          style={{ 
+            width: '100%', 
+            padding: '10px', 
+            cursor: 'pointer', 
+            backgroundColor: '#2563eb', 
+            color: '#fff', 
+            border: 'none', 
+            borderRadius: '6px', 
+            fontWeight: 'bold',
+            marginBottom: '10px'
+          }}
+        >
           {t('button_enter')}
         </button>
+
+        {/* 🌟 BOTÃO ESTILIZADO DE RECUPERAÇÃO DE SENHA */}
+        <Link 
+          to="/forgot-password" 
+          style={{ 
+            display: 'block',
+            width: '100%',
+            padding: '9px 0',
+            textAlign: 'center',
+            backgroundColor: '#f1f5f9',
+            color: '#475569',
+            border: '1px solid #cbd5e1',
+            borderRadius: '6px',
+            textDecoration: 'none',
+            fontSize: '0.875rem',
+            fontWeight: '500',
+            boxSizing: 'border-box',
+            transition: 'background-color 0.2s, color 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#e2e8f0';
+            e.currentTarget.style.color = '#1e293b';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#f1f5f9';
+            e.currentTarget.style.color = '#475569';
+          }}
+        >
+          🔑 {t('forgot_password') || "Esqueceu sua senha?"}
+        </Link>
 
         <div style={{ textAlign: 'center', marginTop: '20px' }}>
           <p style={{ color: '#6b7280' }}>
@@ -102,7 +135,15 @@ const Login: React.FC = () => {
         <button 
           type="button" 
           onClick={testarConexao} 
-          style={{ width: '100%', padding: '5px', background: '#f0f0f0', border: '1px solid #ccc' }}
+          style={{ 
+            width: '100%', 
+            padding: '8px', 
+            background: '#f8fafc', 
+            border: '1px solid #cbd5e1', 
+            borderRadius: '6px', 
+            cursor: 'pointer',
+            color: '#64748b'
+          }}
         >
           {t('test_connection')}
         </button>
