@@ -3,6 +3,7 @@
   "email_label": "Email:",
   "password_label": "Password:",
   "button_enter": "Sign In",
+  "forgot_password": "Forgot password?",
   "no_account": "Don't have a store yet?",
   "create_account": "Create your account for free",
   "test_connection": "Test API Connection",

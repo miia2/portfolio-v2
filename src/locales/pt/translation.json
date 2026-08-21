@@ -3,6 +3,7 @@
   "email_label": "E-mail:",
   "password_label": "Senha:",
   "button_enter": "Entrar no Sistema",
+  "forgot_password": "Esqueceu a senha?",
   "no_account": "Ainda não tem uma loja?",
   "create_account": "Crie sua conta de graça",
   "test_connection": "Testar Conexão com a API",

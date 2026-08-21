@@ -3,6 +3,7 @@
   "email_label": "Correo Electrónico:",
   "password_label": "Contraseña:",
   "button_enter": "Entrar al Sistema",
+  "forgot_password": "¿Olvidaste tu contraseña?",
   "no_account": "¿Aún no tienes una tienda?",
   "create_account": "Crea tu cuenta gratis",
   "test_connection": "Probar Conexión con la API",

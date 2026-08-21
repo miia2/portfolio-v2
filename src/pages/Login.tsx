@@ -91,7 +91,7 @@ const Login: React.FC = () => {
           {t('button_enter')}
         </button>
 
-        {/* 🌟 BOTÃO ESTILIZADO DE RECUPERAÇÃO DE SENHA */}
+        {/* 🌐 Botão Traduzido Dinamicamente via i18n */}
         <Link 
           to="/forgot-password" 
           style={{ 
@@ -118,7 +118,7 @@ const Login: React.FC = () => {
             e.currentTarget.style.color = '#475569';
           }}
         >
-          🔑 {t('forgot_password') || "Esqueceu sua senha?"}
+          🔑 {t('forgot_password')}
         </Link>
 
         <div style={{ textAlign: 'center', marginTop: '20px' }}>
