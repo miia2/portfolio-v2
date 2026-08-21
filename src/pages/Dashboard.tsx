@@ -29,14 +29,12 @@ const Dashboard = () => {
 
   const [user, setUser] = useState<UserData | null>(null);
   
-  // Estados do formulário
   const [nome, setNome] = useState('');
   const [descricao, setDescricao] = useState('');
   const [preco, setPreco] = useState('');
-  const [imagemArquivo, setImagemArquivo] = useState<File | null>(null); // Guardará o arquivo binário da foto
+  const [imagemArquivo, setImagemArquivo] = useState<File | null>(null);
   const [produtoEditando, setProdutoEditando] = useState<Product | null>(null);
 
-  // 1. Carrega dados do perfil do Usuário (Com redirecionamento em caso de erro)
   useEffect(() => {
     const carregarPerfil = async () => {
       try {
@@ -44,7 +42,6 @@ const Dashboard = () => {
         setUser(resUser.data);
       } catch (error) {
         console.error(t('dash_error_loading'), error);
-        // Se der erro de autenticação (ex: token inválido ou expirado), desloga e manda pro login
         logout();
         navigate('/login'); 
       }
@@ -53,44 +50,38 @@ const Dashboard = () => {
     if (token) {
       carregarPerfil();
     } else {
-      navigate('/login'); // Se não tem token nenhum, nem tenta carregar, vai direto pro login
+      navigate('/login');
     }
   }, [token, t, navigate, logout]);
 
-  // 2. React Query: Busca automática dos produtos mapeando a paginação do backend
   const { data: products = [], isLoading: carregandoProdutos } = useQuery<Product[]>({
     queryKey: ['my-products'],
     queryFn: async () => {
-      const res = await api.get('/products/me?page=1&size=50'); // Envia parâmetros de paginação padrão
-      
-      // Se o backend retornar o objeto paginado com a chave 'items', extraímos ela.
-      // Caso contrário (se retornar array puro), usamos o res.data direto.
+      const res = await api.get('/products/me?page=1&size=50');
       return res.data.items ? res.data.items : res.data;
     },
     enabled: !!token,
   });
 
-  // React Query: Mutation limpa para Salvar / Editar Produto
-const salvarProdutoMutation = useMutation({
-  mutationFn: async (formData: FormData) => {
-    if (produtoEditando) {
-      return await api.put(`/products/${produtoEditando.id}`, formData);
-    } else {
-      return await api.post('/products/', formData);
+  const salvarProdutoMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      if (produtoEditando) {
+        return await api.put(`/products/${produtoEditando.id}`, formData);
+      } else {
+        return await api.post('/products/', formData);
+      }
+    },
+    onSuccess: () => {
+      alert(produtoEditando ? t('dash_product_updated') : t('dash_product_created'));
+      limparFormulario();
+      queryClient.invalidateQueries({ queryKey: ['my-products'] });
+    },
+    onError: (error) => {
+      console.error("Erro ao salvar produto:", error);
+      alert(t('dash_error_saving'));
     }
-  },
-  onSuccess: () => {
-    alert(produtoEditando ? t('dash_product_updated') : t('dash_product_created'));
-    limparFormulario();
-    queryClient.invalidateQueries({ queryKey: ['my-products'] });
-  },
-  onError: (error) => {
-    console.error("Erro ao salvar produto:", error);
-    alert(t('dash_error_saving'));
-  }
-});
+  });
 
-  // 4. React Query: Mutation para Excluir Produto
   const excluirProdutoMutation = useMutation({
     mutationFn: async (id: number) => {
       await api.delete(`/products/${id}`, {
@@ -109,7 +100,6 @@ const salvarProdutoMutation = useMutation({
   const handleSubmeterFormulario = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Como o backend agora espera um Form padrão para processar arquivos no Cloudinary, usamos FormData
     const formData = new FormData();
     formData.append('name', nome);
     formData.append('description', descricao);
@@ -117,7 +107,7 @@ const salvarProdutoMutation = useMutation({
     formData.append('is_available', 'true');
     
     if (imagemArquivo) {
-      formData.append('image', imagemArquivo); // Envia o arquivo selecionado
+      formData.append('image', imagemArquivo);
     }
 
     salvarProdutoMutation.mutate(formData);
@@ -135,7 +125,7 @@ const salvarProdutoMutation = useMutation({
     setNome(produto.name);
     setDescricao(produto.description);
     setPreco(produto.price.toString());
-    setImagemArquivo(null); // Reseta a seleção de arquivo para manter a imagem antiga caso não queira mudar
+    setImagemArquivo(null);
   };
 
   const limparFormulario = () => {
@@ -154,25 +144,22 @@ const salvarProdutoMutation = useMutation({
   };
 
   const ejecutarLogout = () => {
-    logout(); // Chama a limpeza global do Zustand (Limpa localStorage e estados)
+    logout();
     window.location.href = '/login';
   };
 
-  // Se o perfil do usuário ainda não chegou da API, bloqueia a tela inteira com o loading genérico
   if (!user) {
     return <p style={{ textAlign: 'center', marginTop: '50px' }}>{t('dash_loading')}</p>;
   }
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
-      
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #e5e7eb', paddingBottom: '20px', marginBottom: '20px' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #e5e7eb', paddingBottom: '20px', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
         <div>
           <h1 style={{ margin: 0, color: '#1e3a8a' }}>{t('dash_title')}</h1>
           <p style={{ margin: 0, color: '#6b7280' }}>{t('dash_welcome')}, {user.full_name}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          
           <button 
             onClick={copiarLinkLoja}
             style={{ backgroundColor: '#10b981', color: '#fff', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
@@ -220,13 +207,12 @@ const salvarProdutoMutation = useMutation({
             style={{ flex: '2 1 300px', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
           />
           
-          {/* Upload de arquivo local do computador/celular */}
           <div style={{ flex: '1 1 100%', display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <label style={{ fontSize: '14px', color: '#4b5563', fontWeight: '500' }}>Imagem do Produto:</label>
             <input 
               type="file" 
               accept="image/*"
-              required={!produtoEditando} // Exige foto apenas para novos registros
+              required={!produtoEditando}
               onChange={(e) => setImagemArquivo(e.target.files ? e.target.files[0] : null)}
               style={{ padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db', backgroundColor: '#fff' }} 
             />
@@ -253,7 +239,6 @@ const salvarProdutoMutation = useMutation({
       <section>
         <h2 style={{ color: '#1f2937' }}>{t('dash_your_products')}</h2>
         
-        {/* Tratamento isolado do carregamento apenas na área dos produtos */}
         {carregandoProdutos ? (
           <p style={{ color: '#6b7280' }}>{t('dash_loading')}</p>
         ) : products.length === 0 ? (
@@ -271,33 +256,37 @@ const salvarProdutoMutation = useMutation({
             <tbody>
               {products.map(produto => (
                 <tr key={produto.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                  <td style={{ padding: '15px' }}>
-                    {produto.image_url ? (
-                      <ProductImage 
-                        src={produto.image_url} 
-                        alt={produto.name} 
-                        style={{ width: '50px', height: '50px', borderRadius: '6px' }} 
-                      />
-                    ) : (
-                      <div style={{ width: '50px', height: '50px', backgroundColor: '#e5e7eb', borderRadius: '6px' }} />
-                    )}
+                  <td style={{ padding: '12px 15px', verticalAlign: 'middle' }}>
+                    <div style={{ width: '50px', height: '50px', minWidth: '50px', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {produto.image_url ? (
+                        <ProductImage 
+                          src={produto.image_url} 
+                          alt={produto.name} 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
+                        />
+                      ) : (
+                        <span style={{ fontSize: '12px', color: '#9ca3af' }}>Sem foto</span>
+                      )}
+                    </div>
                   </td>
                   <td style={{ padding: '15px', color: '#111827', verticalAlign: 'middle' }}>{produto.name}</td>
                   <td style={{ padding: '15px', color: '#059669', fontWeight: 'bold', verticalAlign: 'middle' }}>$ {produto.price.toFixed(2)}</td>
-                  <td style={{ padding: '15px', display: 'flex', gap: '10px', alignItems: 'center', height: '80px' }}>
-                    <button 
-                      onClick={() => iniciarEdicao(produto)}
-                      style={{ backgroundColor: '#f59e0b', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}
-                    >
-                      {t('dash_btn_edit')}
-                    </button>
-                    <button 
-                      onClick={() => executarExclusao(produto.id)}
-                      disabled={excluirProdutoMutation.isPending}
-                      style={{ backgroundColor: '#ef4444', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', opacity: excluirProdutoMutation.isPending ? 0.6 : 1 }}
-                    >
-                      {t('dash_btn_delete')}
-                    </button>
+                  <td style={{ padding: '15px', verticalAlign: 'middle' }}>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      <button 
+                        onClick={() => iniciarEdicao(produto)}
+                        style={{ backgroundColor: '#f59e0b', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}
+                      >
+                        {t('dash_btn_edit')}
+                      </button>
+                      <button 
+                        onClick={() => executarExclusao(produto.id)}
+                        disabled={excluirProdutoMutation.isPending}
+                        style={{ backgroundColor: '#ef4444', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', opacity: excluirProdutoMutation.isPending ? 0.6 : 1 }}
+                      >
+                        {t('dash_btn_delete')}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

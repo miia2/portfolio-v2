@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import api from '../services/api'; // Ajuste o caminho de importação se o seu services/api estiver na mesma pasta ou subpasta
+import api from '../services/api';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { ProductImage } from '../components/ProductImage';
 
@@ -29,34 +29,30 @@ const Store: React.FC = () => {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-  const fetchStoreCatalog = async () => {
-    try {
-      const response = await api.get(`/store/${slug}`);
-      const data = response.data;
+    const fetchStoreCatalog = async () => {
+      try {
+        const response = await api.get(`/store/${slug}`);
+        const data = response.data;
 
-      // Abramos o F12 -> Console para conferir o payload se necessário
-      console.log("Payload da API:", data);
+        if (data && data.store_info) {
+          const produtosExtraidos = data.products_pagination?.items || data.products || [];
 
-      if (data && data.store_info) {
-        // Mapeia a lista extraindo de products_pagination.items
-        const produtosExtraidos = data.products_pagination?.items || data.products || [];
-
-        setStore({
-          full_name: data.store_info.full_name,
-          whatsapp_number: data.store_info.whatsapp_number,
-          products: produtosExtraidos
-        });
+          setStore({
+            full_name: data.store_info.full_name,
+            whatsapp_number: data.store_info.whatsapp_number,
+            products: produtosExtraidos
+          });
+        }
+      } catch (err) {
+        console.error("Erro ao carregar loja:", err);
+        setError(true);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Erro ao carregar loja:", err);
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  if (slug) fetchStoreCatalog();
-}, [slug]);
+    if (slug) fetchStoreCatalog();
+  }, [slug]);
 
   const handleOrder = (product: Product) => {
     if (!store) return;
@@ -111,25 +107,27 @@ const Store: React.FC = () => {
                   display: 'flex', 
                   gap: '20px', 
                   alignItems: 'center',
-                  border: '1px solid #334155'
+                  border: '1px solid #334155',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}
               >
-                {/* Imagem do produto com caixa padrão caso não haja URL */}
-                {product.image_url ? (
-                  <ProductImage 
-                    src={product.image_url} 
-                    alt={product.name}
-                    style={{ width: '96px', height: '96px', borderRadius: '8px', objectFit: 'cover' }}
-                  />
-                ) : (
-                  <div style={{ width: '96px', height: '96px', borderRadius: '8px', backgroundColor: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
-                    📦
-                  </div>
-                )}
+                {/* Contêiner de imagem fixo com bloqueio de expansão */}
+                <div style={{ width: '96px', height: '96px', minWidth: '96px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, background: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {product.image_url ? (
+                    <ProductImage 
+                      src={product.image_url} 
+                      alt={product.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: '24px' }}>📦</span>
+                  )}
+                </div>
 
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '1.3rem', marginBottom: '5px' }}>{product.name}</h3>
-                  <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '10px' }}>{product.description}</p>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h3 style={{ fontSize: '1.3rem', marginBottom: '5px', wordBreak: 'break-word' }}>{product.name}</h3>
+                  <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '10px', wordBreak: 'break-word' }}>{product.description}</p>
                   <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#10b981' }}>
                     R$ {product.price.toFixed(2)}
                   </span>
@@ -145,6 +143,7 @@ const Store: React.FC = () => {
                     borderRadius: '8px', 
                     fontWeight: 'bold', 
                     cursor: 'pointer',
+                    flexShrink: 0,
                     transition: 'background 0.2s'
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = '#20ba56')}

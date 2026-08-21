@@ -13,11 +13,25 @@ export function ProductImage({ src, alt, className = "", style }: ProductImagePr
   return (
     <div 
       className={`relative overflow-hidden bg-gray-200 ${className}`}
-      style={style} // Adicionado aqui para aplicar o estilo recebido!
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        ...style
+      }}
     >
-      {/* Efeito de carregamento (Skeleton cinza piscando) enquanto a imagem não baixa */}
+      {/* Efeito de carregamento (Skeleton cinza) enquanto a imagem carrega */}
       {!isLoaded && (
-        <div className="absolute inset-0 animate-pulse bg-gray-300" />
+        <div 
+          className="absolute inset-0 animate-pulse bg-gray-300" 
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundColor: '#cbd5e1'
+          }}
+        />
       )}
 
       <img
@@ -28,6 +42,14 @@ export function ProductImage({ src, alt, className = "", style }: ProductImagePr
         className={`w-full h-full object-cover transition-opacity duration-500 ${
           isLoaded ? 'opacity-100' : 'opacity-0'
         }`}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block',
+          opacity: isLoaded ? 1 : 0,
+          transition: 'opacity 0.5s ease-in-out'
+        }}
       />
     </div>
   );
