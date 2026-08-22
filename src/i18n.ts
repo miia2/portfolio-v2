@@ -18,8 +18,12 @@ i18n
       es: { translation: translationES },
       'es-ES': { translation: translationES }
     },
-    lng: 'en', 
-    fallbackLng: 'en',
+    // Removido 'lng' fixo para permitir que o detector e o switcher funcionem livremente
+    fallbackLng: 'pt', 
+    detection: {
+      order: ['localStorage', 'navigator'],
+      caches: ['localStorage']
+    },
     interpolation: {
       escapeValue: false 
     }
