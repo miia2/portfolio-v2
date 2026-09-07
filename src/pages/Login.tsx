@@ -91,36 +91,6 @@ const Login: React.FC = () => {
           {t('button_enter')}
         </button>
 
-        {/* 🌐 Botão Traduzido Dinamicamente via i18n */}
-        <Link 
-          to="/forgot-password" 
-          style={{ 
-            display: 'block',
-            width: '100%',
-            padding: '9px 0',
-            textAlign: 'center',
-            backgroundColor: '#f1f5f9',
-            color: '#475569',
-            border: '1px solid #cbd5e1',
-            borderRadius: '6px',
-            textDecoration: 'none',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            boxSizing: 'border-box',
-            transition: 'background-color 0.2s, color 0.2s'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#e2e8f0';
-            e.currentTarget.style.color = '#1e293b';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#f1f5f9';
-            e.currentTarget.style.color = '#475569';
-          }}
-        >
-          🔑 {t('forgot_password')}
-        </Link>
-
         <div style={{ textAlign: 'center', marginTop: '20px' }}>
           <p style={{ color: '#6b7280' }}>
             {t('no_account')}{' '}
